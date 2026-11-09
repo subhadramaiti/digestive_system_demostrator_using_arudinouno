@@ -1,0 +1,109 @@
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <Servo.h>
+
+// LCD address
+LiquidCrystal_I2C lcd(0x3F, 16, 2);
+
+// Servo motor
+Servo motor;
+const int servoPin = 9;
+const unsigned long rotationTime = 1000;
+
+// Five LEDs connected to D2-D6
+const int leds[] = {2, 3, 4, 5, 6};
+const int totalLEDs = 5;
+
+// Organ names displayed on LCD
+const char* organs[] = {
+  "Mouth",
+  "Oesophagus",
+  "Stomach",
+  "Large intestine",
+  "Small intestine"
+};
+
+const unsigned long delayTime = 2000;
+
+void setup() {
+  // Initialize LEDs
+  for (int i = 0; i < totalLEDs; i++) {
+    pinMode(leds[i], OUTPUT);
+    digitalWrite(leds[i], LOW);
+  }
+
+  // Initialize LCD
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+  lcd.print("Digestive System");
+  lcd.setCursor(0, 1);
+  lcd.print("Demonstrator");
+
+  // Initialize servo
+  motor.attach(servoPin);
+  motor.write(90);  // Stop continuous-rotation servo
+
+  delay(2000);
+  lcd.clear();
+}
+
+void loop() {
+  // Step 1: Display organs and light LEDs one by one
+  for (int i = 0; i < totalLEDs; i++) {
+
+    // Turn all LEDs OFF
+    for (int j = 0; j < totalLEDs; j++) {
+      digitalWrite(leds[j], LOW);
+    }
+
+    // Turn ON the current LED
+    digitalWrite(leds[i], HIGH);
+
+    // Display organ name on LCD
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Digestive System");
+    lcd.setCursor(0, 1);
+    lcd.print(organs[i]);
+
+    // Keep LED ON for 2 seconds
+    delay(delayTime);
+
+    // Turn OFF current LED
+    digitalWrite(leds[i], LOW);
+  }
+
+  // Step 2: Display sequence completion
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("LED Sequence");
+  lcd.setCursor(0, 1);
+  lcd.print("Completed!");
+
+  delay(1000);
+
+  // Step 3: Rotate servo
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Motor Rotating");
+  lcd.setCursor(0, 1);
+  lcd.print("Approx. 360 deg");
+
+  motor.write(180);
+  delay(rotationTime);
+
+  // Step 4: Stop servo
+  motor.write(90);
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Motor Stopped");
+  lcd.setCursor(0, 1);
+  lcd.print("Cycle Complete");
+
+  delay(2000);
+}
